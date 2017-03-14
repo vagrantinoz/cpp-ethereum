@@ -1,28 +1,28 @@
 include(ExternalProject)
 
+# FIXME: Rename to LibFF as that's the name of the library.
+
 ExternalProject_Add(snark
-    PREFIX deps
-    # This points to a February 2017 version.
-    DOWNLOAD_NAME snark-6b7e494c.tar.gz
-    URL https://github.com/scipr-lab/libsnark/archive/6b7e494c2407eb8e91ad78635788decb2d736596.tar.gz
-    URL_HASH SHA256=c40ee69a15c8a5baf3980d3686112ccbe8511071faa1cda3875d43e693fc90e4
+    PREFIX ${CMAKE_SOURCE_DIR}/deps
+    DOWNLOAD_NAME libff-2fa434b3.tar.gz
     DOWNLOAD_NO_PROGRESS TRUE
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND CXX=${CMAKE_CXX_COMPILER} CC=${CMAKE_C_COMPILER} make
-        NO_PROCPS=1 STATIC=1 NO_SUPERCOP=1 NO_GTEST=1 NO_DOCS=1 CURVE=ALT_BN128
-        FEATUREFLAGS="-DBINARY_OUTPUT=1 -DMONTGOMERY_OUTPUT=1 -DNO_PT_COMPRESSION=1"
-        lib PREFIX=<INSTALL_DIR> install
-    INSTALL_COMMAND ""
+    URL https://github.com/scipr-lab/libff/archive/2fa434b3d6e9163beedaefffa85043a1180a05e6.tar.gz
+    URL_HASH SHA256=d3266f95a86bbfc908a7a9531df08a47cdd026e76b6290465fb8dfa203606a21
+
+    PATCH_COMMAND ${CMAKE_COMMAND} -E touch <SOURCE_DIR>/third_party/gtest/CMakeLists.txt
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+        -DCURVE=ALT_BN128 -DPERFORMANCE=Off -DWITH_PROCPS=Off
+        -DUSE_PT_COMPRESSION=Off
 )
 
 # Create snark imported library
 ExternalProject_Get_Property(snark INSTALL_DIR)
 add_library(Snark STATIC IMPORTED)
-set(SNARK_LIBRARY ${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}snark${CMAKE_STATIC_LIBRARY_SUFFIX})
-file(MAKE_DIRECTORY ${INSTALL_DIR}/include/libsnark)  # Must exist.
-set(SNARK_INCLUDE_DIRS ${INSTALL_DIR}/include ${INSTALL_DIR}/include/libsnark)
+set(SNARK_LIBRARY ${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}ff${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(SNARK_INCLUDE_DIR ${INSTALL_DIR}/include/libff)
+file(MAKE_DIRECTORY ${SNARK_INCLUDE_DIR})
 set_property(TARGET Snark PROPERTY IMPORTED_LOCATION ${SNARK_LIBRARY})
-set_property(TARGET Snark PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${SNARK_INCLUDE_DIRS})
+set_property(TARGET Snark PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${SNARK_INCLUDE_DIR})
+set_property(TARGET Snark PROPERTY INTERFACE_LINK_LIBRARIES gmp)
 add_dependencies(Snark snark)
 unset(INSTALL_DIR)
