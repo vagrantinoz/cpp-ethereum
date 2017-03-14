@@ -52,6 +52,7 @@ include(ProjectBoost)
 include(ProjectCryptopp)
 include(ProjectJsonCpp)
 include(ProjectJsonRpcCpp)
+include(ProjectSecp256k1)
 include(ProjectSnark)
 
 configure_project(CPUID CURL EVMJIT FATDB MINIUPNPC ROCKSDB PARANOID TESTS VMTRACE)
@@ -87,7 +88,8 @@ if (TOOLS)
 endif()
 
 if (TESTS)
-	add_subdirectory(test)
+	enable_testing()
+	add_subdirectory(test)	
 endif()
 
 # TODO - split out json_spirit, libscrypt and sec256k1
