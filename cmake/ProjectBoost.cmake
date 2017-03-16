@@ -36,6 +36,7 @@ ExternalProject_Add(boost
         --with-regex
         --with-test
         --with-thread
+        --with-program_options  # libff wants it, we may need it in future.
     LOG_BUILD 1
     INSTALL_COMMAND ""
 )
