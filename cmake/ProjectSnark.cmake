@@ -1,4 +1,4 @@
-include(ExternalProject)
+# Depends on ProjectBoost.cmake
 
 # FIXME: Rename to LibFF as that's the name of the library.
 
@@ -11,9 +11,12 @@ ExternalProject_Add(snark
 
     PATCH_COMMAND ${CMAKE_COMMAND} -E touch <SOURCE_DIR>/third_party/gtest/CMakeLists.txt
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+        -DBOOST_INCLUDEDIR=${BOOST_INCLUDE_DIR}
+        -DBOOST_LIBRARYDIR=${BOOST_LIBRARY_DIR}
         -DCURVE=ALT_BN128 -DPERFORMANCE=Off -DWITH_PROCPS=Off
         -DUSE_PT_COMPRESSION=Off
 )
+add_dependencies(snark boost)
 
 # Create snark imported library
 ExternalProject_Get_Property(snark INSTALL_DIR)
