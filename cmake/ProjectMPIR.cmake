@@ -3,7 +3,7 @@ ExternalProject_Add(mpir
     DOWNLOAD_NAME mpir-master.tar.gz
     DOWNLOAD_NO_PROGRESS TRUE
     URL https://github.com/chfast/mpir/archive/master.tar.gz
-    URL_HASH SHA256=e6c11d2a7920d6a80975acb4fd31dcf30512905a3dcd4e7f06d34e639c2ef12f
+    URL_HASH SHA256=ed52442ab345c9dbb463d9c4bee4436785dd6a3ab6d24e461302dd3f93bedbb4
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
         -DCMAKE_BUILD_TYPE=Release
 )
