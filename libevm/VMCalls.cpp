@@ -116,14 +116,14 @@ void VM::caseCreate()
 
 	if (m_ext->balance(m_ext->myAddress) >= endowment && m_ext->depth < 1024)
 	{
-		*io_gas = m_io_gas;
-		u256 createGas = *io_gas;
+		*m_io_gas_p = m_io_gas;
+		u256 createGas = *m_io_gas_p;
 		if (!m_schedule->staticCallDepthLimit())
 			createGas -= createGas / 64;
 		u256 gas = createGas;
 		m_SP[1] = (u160)m_ext->create(endowment, gas, bytesConstRef(m_mem.data() + initOff, initSize), m_onOp);
-		*io_gas -= (createGas - gas);
-		m_io_gas = uint64_t(*io_gas);
+		*m_io_gas_p -= (createGas - gas);
+		m_io_gas = uint64_t(*m_io_gas_p);
 	}
 	else
 		m_SP[1] = 0;

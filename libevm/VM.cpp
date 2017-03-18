@@ -90,21 +90,19 @@ void VM::onOperation()
 	#define onOperation()
 #endif
 
-void VM::checkStack(unsigned _removed, unsigned _added)
+void VM::adjustStack(unsigned _removed, unsigned _added)
 {
 #if EVM_HACK_STACK
 	m_SP += removed;
 	m_SP -= added;
 #else
-	// check bounds
+	// adjust stack and check bounds
 	if (m_stackBase < (m_SP += _removed) || (m_SP -= _added) <= m_stack)
 		throwBadStack(stackSize(), _removed, _added);
 #endif
 
 	// set current SP to SP, set SP' to SP adjusted per OP
-	u256* SP = m_SP;
-	m_SP = m_SPP;
-	m_SPP = SP;
+	std::swap(m_SP, m_SPP);
 }
 
 
@@ -149,7 +147,7 @@ void VM::fetchInstruction()
 {
 	m_OP = Instruction(m_code[m_PC]);
 	const InstructionMetric& metric = c_metrics[static_cast<size_t>(m_OP)];
-	checkStack(metric.args, metric.ret);
+	adjustStack(metric.args, metric.ret);
 
 	// FEES...
 	m_runGas = toInt63(m_schedule->tierStepGas[static_cast<unsigned>(metric.gasPriceTier)]);
@@ -171,7 +169,7 @@ void VM::fetchInstruction()
 
 owning_bytes_ref VM::exec(u256& _io_gas, ExtVMFace& _ext, OnOpFunc const& _onOp)
 {
-	io_gas = &_io_gas;
+	m_io_gas_p = &_io_gas;
 	m_io_gas = uint64_t(_io_gas);
 	m_ext = &_ext;
 	m_schedule = &m_ext->evmSchedule();
@@ -189,11 +187,11 @@ owning_bytes_ref VM::exec(u256& _io_gas, ExtVMFace& _ext, OnOpFunc const& _onOp)
 	}
 	catch (...)
 	{
-		*io_gas = m_io_gas;
+		*m_io_gas_p = m_io_gas;
 		throw;
 	}
 
-	*io_gas = m_io_gas;
+	*m_io_gas_p = m_io_gas;
 	return std::move(m_output);
 }
 

@@ -60,7 +60,7 @@ struct InstructionMetric
 class VM: public VMFace
 {
 public:
-	virtual owning_bytes_ref exec(u256& io_gas, ExtVMFace& _ext, OnOpFunc const& _onOp) override final;
+	virtual owning_bytes_ref exec(u256& _io_gas, ExtVMFace& _ext, OnOpFunc const& _onOp) override final;
 
 #if EVM_JUMPS_AND_SUBS
 	// invalid code will throw an exeption
@@ -77,7 +77,7 @@ public:
 
 private:
 
-	u256* io_gas = 0;
+	u256* m_io_gas_p = 0;
 	uint64_t m_io_gas = 0;
 	ExtVMFace* m_ext = 0;
 	OnOpFunc m_onOp;
@@ -163,7 +163,7 @@ private:
 	int poolConstant(const u256&);
 
 	void onOperation();
-	void checkStack(unsigned _removed, unsigned _added);
+	void adjustStack(unsigned _removed, unsigned _added);
 	uint64_t gasForMem(u512 _size);
 	void updateIOGas();
 	void updateGas();
