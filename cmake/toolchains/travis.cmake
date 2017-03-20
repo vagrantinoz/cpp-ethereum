@@ -1,0 +1,1 @@
+set(CMAKE_CXX_FLAGS_INIT "-std=c++11")
