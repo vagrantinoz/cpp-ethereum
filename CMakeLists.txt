@@ -22,7 +22,7 @@
 # (c) 2014-2016 cpp-ethereum contributors.
 #------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.4.3)
 
 set(ETH_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}/cmake" CACHE PATH "The path to the cmake directory")
 list(APPEND CMAKE_MODULE_PATH ${ETH_CMAKE_DIR})
@@ -36,6 +36,10 @@ eth_policy()
 # project name and version should be set after cmake_policy CMP0048
 project(cpp-ethereum VERSION "1.3.0")
 
+if (NOT EXISTS ${CMAKE_SOURCE_DIR}/evmjit/.git)
+    message(FATAL_ERROR "Git submodules not initialized, execute:\n  git submodule update --init")
+endif()
+
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY On)
 
 include(EthOptions)
@@ -44,10 +48,13 @@ include(EthExecutableHelper)
 include(EthDependencies)
 include(EthUtils)
 
-include(deps/jsoncpp.cmake)
-include(deps/jsonrpc.cmake)
-include(deps/cryptopp.cmake)
-include(deps/boost.cmake)
+include(ProjectBoost)
+include(ProjectCryptopp)
+include(ProjectJsonCpp)
+include(ProjectJsonRpcCpp)
+include(ProjectSecp256k1)
+
+
 
 configure_project(CPUID CURL EVMJIT FATDB MINIUPNPC ROCKSDB PARANOID TESTS VMTRACE)
 
@@ -82,7 +89,8 @@ if (TOOLS)
 endif()
 
 if (TESTS)
-	add_subdirectory(test)
+	enable_testing()
+	add_subdirectory(test)	
 endif()
 
 # TODO - split out json_spirit, libscrypt and sec256k1

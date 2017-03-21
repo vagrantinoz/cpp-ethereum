@@ -22,7 +22,7 @@
 #include "Precompiled.h"
 #include <libdevcore/Log.h>
 #include <libdevcore/SHA3.h>
-#include <libdevcore/Hash.h>
+#include <libdevcrypto/Hash.h>
 #include <libdevcrypto/Common.h>
 #include <libethcore/Common.h>
 using namespace std;
@@ -66,28 +66,28 @@ ETH_REGISTER_PRECOMPILED(ecrecover)(bytesConstRef _in)
 				{
 					ret = dev::sha3(rec);
 					memset(ret.data(), 0, 12);
-					return ret.asBytes();
+					return {true, ret.asBytes()};
 				}
 			}
 			catch (...) {}
 		}
 	}
-	return {};
+	return {true, {}};
 }
 
 ETH_REGISTER_PRECOMPILED(sha256)(bytesConstRef _in)
 {
-	return dev::sha256(_in).asBytes();
+	return {true, dev::sha256(_in).asBytes()};
 }
 
 ETH_REGISTER_PRECOMPILED(ripemd160)(bytesConstRef _in)
 {
-	return h256(dev::ripemd160(_in), h256::AlignRight).asBytes();
+	return {true, h256(dev::ripemd160(_in), h256::AlignRight).asBytes()};
 }
 
 ETH_REGISTER_PRECOMPILED(identity)(bytesConstRef _in)
 {
-	return _in.toBytes();
+	return {true, _in.toBytes()};
 }
 
 }
