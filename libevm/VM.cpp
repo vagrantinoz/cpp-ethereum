@@ -90,19 +90,20 @@ void VM::onOperation()
 	#define onOperation()
 #endif
 
+//
+// set current SP to SP', adjust SP' per _removed and _added items
+//
 void VM::adjustStack(unsigned _removed, unsigned _added)
 {
+	m_SP = m_SPP;
 #if EVM_HACK_STACK
-	m_SP += removed;
-	m_SP -= added;
+	m_SPP += removed;
+	m_SPP -= added;
 #else
 	// adjust stack and check bounds
-	if (m_stackBase < (m_SP += _removed) || (m_SP -= _added) <= m_stack)
+	if (m_stackBase < (m_SPP += _removed) || (m_SPP -= _added) <= m_stack)
 		throwBadStack(stackSize(), _removed, _added);
 #endif
-
-	// set current SP to SP, set SP' to SP adjusted per OP
-	std::swap(m_SP, m_SPP);
 }
 
 
