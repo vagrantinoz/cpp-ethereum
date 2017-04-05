@@ -21,6 +21,7 @@
 
 #include "SealEngine.h"
 #include "Transaction.h"
+#include <libevm/ExtVMFace.h>
 using namespace std;
 using namespace dev;
 using namespace eth;
@@ -42,9 +43,11 @@ void SealEngineFace::populateFromParent(BlockHeader& _bi, BlockHeader const& _pa
 	_bi.populateFromParent(_parent);
 }
 
-void SealEngineFace::verifyTransaction(ImportRequirements::value _ir, TransactionBase const& _t, BlockHeader const&) const
+void SealEngineFace::verifyTransaction(ImportRequirements::value _ir, TransactionBase const& _t, BlockHeader const& _bi) const
 {
-	if (_ir & ImportRequirements::TransactionSignatures)
+	if ((_ir & ImportRequirements::TransactionSignatures) && _bi.number() < chainParams().u256Param("metropolisForkBlock") && _t.hasZeroSignature())
+		BOOST_THROW_EXCEPTION(InvalidSignature());
+	if (_bi.number() >= chainParams().u256Param("homsteadForkBlock") && (_ir & ImportRequirements::TransactionSignatures))
 		_t.checkLowS();
 }
 
@@ -55,4 +58,18 @@ SealEngineFace* SealEngineRegistrar::create(ChainOperationParams const& _params)
 	if (ret)
 		ret->setChainParams(_params);
 	return ret;
+}
+
+EVMSchedule const& SealEngineBase::evmSchedule(EnvInfo const& _envInfo) const
+{
+	if (_envInfo.number() >= chainParams().u256Param("metropolisForkBlock"))
+		return MetropolisSchedule;
+	if (_envInfo.number() >= chainParams().u256Param("EIP158ForkBlock"))
+		return EIP158Schedule;
+	else if (_envInfo.number() >= chainParams().u256Param("EIP150ForkBlock"))
+		return EIP150Schedule;
+	else if (_envInfo.number() >= chainParams().u256Param("homsteadForkBlock"))
+		return HomesteadSchedule;
+	else
+		return FrontierSchedule;
 }
